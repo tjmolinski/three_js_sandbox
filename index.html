@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Three.js app </title>
+    <style>canvas { width: 100%; height: 100% }</style>
+  </head>
+  <body>
+    <script src="js/Three.js"></script>
+    <script>
+      //Test goes here
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth/1.1, window.innerHeight/1.1);
+      //renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      var group = new THREE.Object3D();
+      var sphereGeo = new THREE.SphereGeometry(10, 20, 20, 0, Math.PI*2, 0, Math.PI);
+      var cubeGeo = new THREE.CubeGeometry(1,1,1);
+      var texture = THREE.ImageUtils.loadTexture("textures/basket.jpg");
+      var crate = THREE.ImageUtils.loadTexture("textures/crate.gif");
+      var material = new THREE.MeshBasicMaterial({map:texture});
+      var cubeMaterial = new THREE.MeshBasicMaterial({map:crate});
+      var sphere = new THREE.Mesh(sphereGeo, material);
+      var cube = new THREE.Mesh(cubeGeo, cubeMaterial);
+      group.add(sphere);
+      group.add(cube);
+      scene.add(group);
+      
+      cube.position.z = 20;
+      camera.position.z = 20;
+      
+      document.addEventListener('keydown', onKeyDown, false);
+      document.addEventListener('keyup', onKeyUp, false);
+
+      function render() {
+        test();
+        lookAtCube();
+        requestAnimationFrame(render);
+        renderer.render(scene, camera);
+        camera.lookAt( group.position );
+      }
+      render();
+
+      function test() {
+        var pos1 = new THREE.Vector3(cube.position.x, cube.position.y, cube.position.z);
+        var pos2 = new THREE.Vector3(sphere.position.x, sphere.position.y, sphere.position.z);
+        var vec = new THREE.Vector3();
+        if(pos1.distanceTo(pos2) > 12) {
+          vec = vec.subVectors(pos2, pos1);
+          cube.position.x += vec.x * 0.01;
+          cube.position.y += vec.y * 0.01;
+          cube.position.z += vec.z * 0.01;
+        }
+
+      }
+
+      function lookAtCube() {
+        var center = new THREE.Vector3(sphere.position.x, sphere.position.y, sphere.position.z);
+        var target = new THREE.Vector3(cube.position.x, cube.position.y, cube.position.z);
+        var cam = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
+        var vec = new THREE.Vector3();
+        vec = vec.subVectors(target, center);
+        vec = vec.normalize();
+        var v1 = new THREE.Vector3();
+        //cube.position.x += 0.1;
+        v1.x = cube.matrixWorld.getPosition().x + (vec.x * 1);
+        v1.y = cube.matrixWorld.getPosition().y + (vec.y * 1);
+        v1.z = cube.matrixWorld.getPosition().z + (vec.z * 1);
+        camera.applyMatrix(camera.matrix.setPosition(v1));
+        //camera.matrixWorld.getPosition().x = cube.matrixWorld.getPosition().x + (vec.x*10);
+        //camera.matrixWorld.getPosition().y = cube.matrixWorld.getPosition().y + (vec.y*10);
+        //camera.matrixWorld.getPosition().z = cube.matrixWorld.getPosition().z + (vec.z*10);
+      }
+
+      function onKeyDown(e) {
+        switch(e.keyCode) {
+          case 38: //Down arrow
+          //group.applyMatrix(group.matrixWorld.makeRotationX(-0.1));
+          sphere.applyMatrix(sphere.matrixWorld.makeRotationX(0.1));
+          break;
+          case 40: //Up arrow
+          //group.applyMatrix(group.matrixWorld.makeRotationX(0.1));
+          sphere.applyMatrix(sphere.matrixWorld.makeRotationX(-0.1));
+          break;
+          case 39: //Right arrow
+          sphere.applyMatrix(sphere.matrixWorld.makeRotationY(-0.1));
+          break;
+          case 37: //Left arrow
+          sphere.applyMatrix(sphere.matrixWorld.makeRotationY(0.1));
+          break;
+        };
+      }
+
+      function onKeyUp(e) {
+        switch(e.keyCode) {
+          case 38: //Down arrow
+          break;
+          case 40: //Up arrow
+          break;
+          case 39: //Right arrow
+          break;
+          case 37: //Left arrow 
+          break;
+        }
+      }
+
+    </script>
+  </body>
+</html>
