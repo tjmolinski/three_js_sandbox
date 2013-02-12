@@ -2,6 +2,8 @@
 <html>
   <head>
     <title> Three.js app </title>
+    <meta charset="utf-8">
+    <meta content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" name="viewport">
     <style>canvas { width: 100%; height: 100% }</style>
   </head>
   <body>
@@ -17,26 +19,45 @@
       document.body.appendChild(renderer.domElement);
 
       var group = new THREE.Object3D();
+      var cubeGroup = new THREE.Object3D();
       var sphereGeo = new THREE.SphereGeometry(10, 20, 20, 0, Math.PI*2, 0, Math.PI);
       var cubeGeo = new THREE.CubeGeometry(1,1,1);
-      var texture = THREE.ImageUtils.loadTexture("textures/basket.jpg");
+      var xGeo = new THREE.CubeGeometry(1,0.1, 0.1);
+      var yGeo = new THREE.CubeGeometry(0.1,1,0.1);
+      var zGeo = new THREE.CubeGeometry(0.1,0.1,1);
+      var texture = THREE.ImageUtils.loadTexture("textures/moon.jpg");
       var crate = THREE.ImageUtils.loadTexture("textures/crate.gif");
       var material = new THREE.MeshBasicMaterial({map:texture});
       var cubeMaterial = new THREE.MeshBasicMaterial({map:crate});
+      var redMat = new THREE.MeshBasicMaterial({color:0xff0000});
+      var blueMat = new THREE.MeshBasicMaterial({color:0x0000ff});
+      var greenMat = new THREE.MeshBasicMaterial({color:0x00ff00});
       var sphere = new THREE.Mesh(sphereGeo, material);
       var cube = new THREE.Mesh(cubeGeo, cubeMaterial);
-      group.add(sphere);
-      group.add(cube);
+      var cube2 = new THREE.Mesh(cubeGeo, cubeMaterial);
+      var xCube = new THREE.Mesh(xGeo, redMat);
+      var yCube = new THREE.Mesh(yGeo, blueMat);
+      var zCube = new THREE.Mesh(zGeo, greenMat);
+      //group.add(sphere);
+      cubeGroup.add(cube);
+      cube.add(xCube);
+      cube.add(yCube);
+      cube.add(zCube);
+      group.add(cubeGroup);
       scene.add(group);
       
-      cube.position.z = 20;
-      camera.position.z = 20;
+      cubeGroup.position.z = 0;
+      cube2.position.x = 0;
+      camera.position.z = 5;
+      xCube.position.x = 1;
+      yCube.position.y = 1;
+      zCube.position.z = 1;
       
       document.addEventListener('keydown', onKeyDown, false);
       document.addEventListener('keyup', onKeyUp, false);
 
       function render() {
-        test();
+        //test(cube);
         lookAtCube();
         requestAnimationFrame(render);
         renderer.render(scene, camera);
@@ -44,7 +65,23 @@
       }
       render();
 
-      function test() {
+      var rotObjectMatrix;
+      function rotateAroundObjectAxis(object, axis, radians) {
+        rotObjectMatrix = new THREE.Matrix4();
+        rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+        object.matrix.multiply(rotObjectMatrix);
+        object.rotation.setEulerFromRotationMatrix(object.matrix, object.scale);
+      }
+      var rotWorldMatrix;
+      function rotateAroundWorldAxis(object, axis, radians) {
+        rotWorldMatrix = new THREE.Matrix4();
+        rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+        rotWorldMatrix.multiply(object.matrix);
+        object.matrix = rotWorldMatrix;
+        object.rotation.setEulerFromRotationMatrix(object.matrix);
+      }
+
+      function test(cube) {
         var pos1 = new THREE.Vector3(cube.position.x, cube.position.y, cube.position.z);
         var pos2 = new THREE.Vector3(sphere.position.x, sphere.position.y, sphere.position.z);
         var vec = new THREE.Vector3();
@@ -69,29 +106,34 @@
         v1.x = cube.matrixWorld.getPosition().x + (vec.x * 1);
         v1.y = cube.matrixWorld.getPosition().y + (vec.y * 1);
         v1.z = cube.matrixWorld.getPosition().z + (vec.z * 1);
-        camera.applyMatrix(camera.matrix.setPosition(v1));
+        //camera.applyMatrix(camera.matrix.setPosition(v1));
         //camera.matrixWorld.getPosition().x = cube.matrixWorld.getPosition().x + (vec.x*10);
         //camera.matrixWorld.getPosition().y = cube.matrixWorld.getPosition().y + (vec.y*10);
         //camera.matrixWorld.getPosition().z = cube.matrixWorld.getPosition().z + (vec.z*10);
       }
 
       function onKeyDown(e) {
+        var xAxis = new THREE.Vector3(1,0,0);
+        var yAxis = new THREE.Vector3(0,1,0);
+        var zAxis = new THREE.Vector3(0,0,1);
+        cube.rotation = cubeGroup.rotation;
         switch(e.keyCode) {
-          case 38: //Down arrow
-          //group.applyMatrix(group.matrixWorld.makeRotationX(-0.1));
-          sphere.applyMatrix(sphere.matrixWorld.makeRotationX(0.1));
+          case 38: //Up arrow
+          //rotateAroundWorldAxis(cube, xAxis, Math.PI/90);
+          //cube.position.x += cubeGroup.localToWorld(xAxis).x;
+          cubeGroup.position.x += cubeGroup.worldToLocal(xAxis).normalize().x;
           break;
-          case 40: //Up arrow
-          //group.applyMatrix(group.matrixWorld.makeRotationX(0.1));
-          sphere.applyMatrix(sphere.matrixWorld.makeRotationX(-0.1));
+          case 40: //Down arrow
+          rotateAroundWorldAxis(cubeGroup, xAxis, Math.PI/90);
           break;
           case 39: //Right arrow
-          sphere.applyMatrix(sphere.matrixWorld.makeRotationY(-0.1));
+          rotateAroundWorldAxis(cubeGroup, yAxis, Math.PI/90);
           break;
           case 37: //Left arrow
-          sphere.applyMatrix(sphere.matrixWorld.makeRotationY(0.1));
+          rotateAroundWorldAxis(cubeGroup, yAxis, -Math.PI/90);
           break;
         };
+        console.log(cubeGroup.worldToLocal(xAxis).normalize());
       }
 
       function onKeyUp(e) {
