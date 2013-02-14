@@ -49,13 +49,15 @@
       cubeGroup.position.z = 0;
       cube2.position.x = 0;
       camera.position.z = 5;
+      cube.position.x += 1;
+      cube.position.y -= 1;
+      cube.position.z += 1;
       xCube.position.x = 1;
       yCube.position.y = 1;
       zCube.position.z = 1;
       
       document.addEventListener('keydown', onKeyDown, false);
-      document.addEventListener('keyup', onKeyUp, false);
-
+  
       function render() {
         //test(cube);
         lookAtCube();
@@ -65,13 +67,8 @@
       }
       render();
 
-      var rotObjectMatrix;
-      function rotateAroundObjectAxis(object, axis, radians) {
-        rotObjectMatrix = new THREE.Matrix4();
-        rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
-        object.matrix.multiply(rotObjectMatrix);
-        object.rotation.setEulerFromRotationMatrix(object.matrix, object.scale);
-      }
+
+
       var rotWorldMatrix;
       function rotateAroundWorldAxis(object, axis, radians) {
         rotWorldMatrix = new THREE.Matrix4();
@@ -113,42 +110,33 @@
       }
 
       function onKeyDown(e) {
-        var xAxis = new THREE.Vector3(1,0,0);
-        var yAxis = new THREE.Vector3(0,1,0);
-        var zAxis = new THREE.Vector3(0,0,1);
-        cube.rotation = cubeGroup.rotation;
+        var rotation_matrix;
         switch(e.keyCode) {
+          case 32: //Space bar
+            cube.translateY(0.5);
+          break;
           case 38: //Up arrow
-          //rotateAroundWorldAxis(cube, xAxis, Math.PI/90);
-          //cube.position.x += cubeGroup.localToWorld(xAxis).x;
-          cubeGroup.position.x += cubeGroup.worldToLocal(xAxis).normalize().x;
+            rotation_matrix = new THREE.Matrix4().makeRotationX(-0.02);
+            cube.matrix.multiply(rotation_matrix);
+            cube.rotation.setEulerFromRotationMatrix(cube.matrix);
           break;
           case 40: //Down arrow
-          rotateAroundWorldAxis(cubeGroup, xAxis, Math.PI/90);
+            rotation_matrix = new THREE.Matrix4().makeRotationX(0.02);
+            cube.matrix.multiply(rotation_matrix);
+            cube.rotation.setEulerFromRotationMatrix(cube.matrix);
           break;
           case 39: //Right arrow
-          rotateAroundWorldAxis(cubeGroup, yAxis, Math.PI/90);
+            rotation_matrix = new THREE.Matrix4().makeRotationY(0.02);
+            cube.matrix.multiply(rotation_matrix);
+            cube.rotation.setEulerFromRotationMatrix(cube.matrix);
           break;
           case 37: //Left arrow
-          rotateAroundWorldAxis(cubeGroup, yAxis, -Math.PI/90);
+            rotation_matrix = new THREE.Matrix4().makeRotationY(-0.02);
+            cube.matrix.multiply(rotation_matrix);
+            cube.rotation.setEulerFromRotationMatrix(cube.matrix);
           break;
         };
-        console.log(cubeGroup.worldToLocal(xAxis).normalize());
       }
-
-      function onKeyUp(e) {
-        switch(e.keyCode) {
-          case 38: //Down arrow
-          break;
-          case 40: //Up arrow
-          break;
-          case 39: //Right arrow
-          break;
-          case 37: //Left arrow 
-          break;
-        }
-      }
-
     </script>
   </body>
 </html>
