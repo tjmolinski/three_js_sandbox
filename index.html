@@ -19,7 +19,6 @@
       document.body.appendChild(renderer.domElement);
 
       var group = new THREE.Object3D();
-      var cubeGroup = new THREE.Object3D();
       var sphereGeo = new THREE.SphereGeometry(10, 20, 20, 0, Math.PI*2, 0, Math.PI);
       var cubeGeo = new THREE.CubeGeometry(1,1,1);
       var xGeo = new THREE.CubeGeometry(1,0.1, 0.1);
@@ -38,20 +37,15 @@
       var xCube = new THREE.Mesh(xGeo, redMat);
       var yCube = new THREE.Mesh(yGeo, blueMat);
       var zCube = new THREE.Mesh(zGeo, greenMat);
-      //group.add(sphere);
-      cubeGroup.add(cube);
+      group.add(sphere);
       cube.add(xCube);
       cube.add(yCube);
       cube.add(zCube);
-      group.add(cubeGroup);
       scene.add(group);
+      scene.add(cube);
       
-      cubeGroup.position.z = 0;
-      cube2.position.x = 0;
-      camera.position.z = 5;
-      cube.position.x += 1;
-      cube.position.y -= 1;
-      cube.position.z += 1;
+      cube.position.x = 12;
+      camera.position.z = 25;
       xCube.position.x = 1;
       yCube.position.y = 1;
       zCube.position.z = 1;
@@ -59,11 +53,16 @@
       document.addEventListener('keydown', onKeyDown, false);
   
       function render() {
-        //test(cube);
-        lookAtCube();
+        test(cube);
+        //lookAtCube();
+        var vec = new THREE.Vector3();
+        vec.x = 0;
+        vec.y = 0;
+        vec.z = 0;
+        cube.lookAt(vec);
         requestAnimationFrame(render);
         renderer.render(scene, camera);
-        camera.lookAt( group.position );
+        //camera.lookAt( group.position );
       }
       render();
 
@@ -88,7 +87,6 @@
           cube.position.y += vec.y * 0.01;
           cube.position.z += vec.z * 0.01;
         }
-
       }
 
       function lookAtCube() {
@@ -112,8 +110,20 @@
       function onKeyDown(e) {
         var rotation_matrix;
         switch(e.keyCode) {
+          case 73: //I
+          cube.translateY(2);
+          break;
+          case 74: //J
+          cube.translateX(2);
+          break;
+          case 75: //K
+          cube.translateY(-2);
+          break;
+          case 76: //L
+          cube.translateX(-2);
+          break;
           case 32: //Space bar
-            cube.translateY(0.5);
+          cube.translateX(4);
           break;
           case 38: //Up arrow
             rotation_matrix = new THREE.Matrix4().makeRotationX(-0.02);
